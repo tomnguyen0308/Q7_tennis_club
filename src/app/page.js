@@ -21,8 +21,27 @@ function formatVND(amount) {
 }
 function formatSessionLabelFromDate(dateValue) {
   if (!dateValue) return "";
-  const parsed = new Date('${dateValue}T00:00:00');
-  if (Number.isNaN(parsed.getTime())) return "";
+  const parts = dateValue.split("-");
+  if (parts.length !==3) return dateValue;
+
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  if (!year || !month || !day) return dateValue;
+
+  const parsed = new Date(year, month - 1, day);
+  if (Number.isNaN(parsed.getTime())) return dateValue;
+
+
+  // Guard against impossible dates like 2026-02-31 auto-rollover
+
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day
+  ) {
+    return dateValue;
+  }
   return parsed.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
