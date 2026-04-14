@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabase";
 
 const ADMIN_PASSWORD = "keobonG11";
-const CASUAL_FEE = 170000;
+const CASUAL_FEE = 130000;
 
 function isBanned(name) {
   const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
