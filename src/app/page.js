@@ -19,7 +19,16 @@ function formatVND(amount) {
   if (amount === 0) return "0đ";
   return (amount / 1000) + "k";
 }
-
+function formatSessionLabelFromDate(dateValue) {
+  if (!dateValue) return "";
+  const parsed = new Date('${dateValue}T00:00:00');
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
 function stripCasual(name) {
   return name.replace(/ \(casual\)$/i, "").trim();
 }
@@ -117,18 +126,21 @@ function AddMatchModal({ onAdd, onClose, loading, allPlayers }) {
 }
 
 function AddSessionModal({ onAdd, onClose, loading }) {
-  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const now = new Date();
-  const [label, setLabel] = useState(`${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`);
+  const initialDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const [dateValue, setDateValue] = useState(initialDate);
+  const previewLabel = formatSessionLabelFromDate(dateValue);
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }} onClick={onClose}>
       <div style={{ background: "#111620", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 340 }} onClick={e => e.stopPropagation()}>
         <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: "#e2e8f0" }}>New Session</div>
-        <input value={label} onChange={e => setLabel(e.target.value)}
+        <input type="date" value={dateValue} onChange={e => setDateValue(e.target.value)}
           style={{ width: "100%", background: "#1a2030", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#e2e8f0", padding: "10px 12px", fontSize: 14, marginBottom: 16, boxSizing: "border-box" }} />
-        <button onClick={() => label.trim() && onAdd(label)} disabled={!label.trim() || loading}
-          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: label.trim() && !loading ? "#60A5FA" : "rgba(255,255,255,0.06)", color: label.trim() && !loading ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 10, fontFamily: "monospace" }}>
+          Session label preview: {previewLabel || "—"}
+        </div>
+        <button onClick={() => dateValue && onAdd(dateValue)} disabled={!dateValue || loading}
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: dateValue && !loading ? "#60A5FA" : "rgba(255,255,255,0.06)", color: dateValue && !loading ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
           {loading ? "CREATING..." : "CREATE SESSION"}
         </button>
       </div>
@@ -207,7 +219,9 @@ export default function ClubMatchLog() {
   }, [loadData]);
 
   // Sessions
-  const addSession = async (label) => {
+  const addSession = async (selectedDate) => {
+    const label = formatSessionLabelFromDate(selectedDate);
+    if (!label) return;
     setSavingSession(true);
     const { data } = await supabase.from("sessions").insert([{ label }]).select().single();
     if (data) { setActiveSessionId(data.id); setShowAddSession(false); await loadData(); }
