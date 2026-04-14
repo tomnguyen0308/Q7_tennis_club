@@ -142,6 +142,7 @@ function AddSessionModal({ onAdd, onClose, loading }) {
         <button onClick={() => dateValue && onAdd(dateValue)} disabled={!dateValue || loading}
           style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: dateValue && !loading ? "#60A5FA" : "rgba(255,255,255,0.06)", color: dateValue && !loading ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }} />
         <button onClick={() => label.trim() && onAdd(label)} disabled={!label.trim() || loading}
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: label.trim() && !loading ? "#60A5FA" : "rgba(255,255,255,0.06)", color: label.trim() && !loading ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
           {loading ? "CREATING..." : "CREATE SESSION"}
         </button>
       </div>
