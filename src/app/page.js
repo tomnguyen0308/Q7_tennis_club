@@ -646,7 +646,7 @@ export default function ClubMatchLog() {
                                     {fine > 0 ? `${fine / 10000} loss${fine / 10000 > 1 ? "es" : ""}` : "no losses"}
                                   </span>
                                   <span style={{ fontSize: 10, fontFamily: "monospace", padding: "2px 7px", borderRadius: 6, background: c.paid ? "rgba(74,222,128,0.1)" : "rgba(251,146,60,0.1)", color: c.paid ? "#4ADE80" : "#FB923C", border: `1px solid ${c.paid ? "rgba(74,222,128,0.2)" : "rgba(251,146,60,0.2)"}` }}>
-                                    {c.paid ? "✓ 170k paid" : "⏳ 170k unpaid"}
+                                    {c.paid ? `✓ ${formatVND(CASUAL_FEE)} paid` : `⏳ ${formatVND(CASUAL_FEE)} unpaid`}
                                   </span>
                                 </div>
                               </div>
