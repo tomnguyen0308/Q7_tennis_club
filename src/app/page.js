@@ -149,6 +149,7 @@ function AddSessionModal({ onAdd, onClose, loading }) {
   const initialDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   const [dateValue, setDateValue] = useState(initialDate);
   const previewLabel = formatSessionLabelFromDate(dateValue);
+  const canCreate = Boolean(dateValue && previewLabel) && !loading;
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }} onClick={onClose}>
       <div style={{ background: "#111620", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 24, width: "100%", maxWidth: 340 }} onClick={e => e.stopPropagation()}>
@@ -158,8 +159,8 @@ function AddSessionModal({ onAdd, onClose, loading }) {
         <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 10, fontFamily: "monospace" }}>
           Session label preview: {previewLabel || "—"}
         </div>
-        <button onClick={() => dateValue && onAdd(dateValue)} disabled={!dateValue || loading}
-          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: dateValue && !loading ? "#60A5FA" : "rgba(255,255,255,0.06)", color: dateValue && !loading ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
+        <button onClick={() => canCreate && onAdd(dateValue)} disabled={!canCreate}
+          style={{ width: "100%", padding: "12px", borderRadius: 10, border: "none", background: canCreate ? "#60A5FA" : "rgba(255,255,255,0.06)", color: canCreate ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
           {loading ? "CREATING..." : "CREATE SESSION"}
         </button>
       </div>
