@@ -201,7 +201,7 @@ export default function ClubMatchLog() {
   const [fnbPlayer, setFnbPlayer] = useState("");
   const [fnbItem, setFnbItem] = useState("");
   const [fnbQty, setFnbQty] = useState("1");
-  const [fnbPrice, setFnbPrice] = useState("");
+  const [fnbUnitPrice, setFnbUnitPrice] = useState("")
 
   const loadData = useCallback(async () => {
     setError(null);
@@ -310,9 +310,20 @@ export default function ClubMatchLog() {
 
   // F&B
   const addFnbOrder = async () => {
-    if (!fnbPlayer || !fnbItem.trim() || !fnbPrice) return;
-    await supabase.from("fnb_orders").insert([{ player_name: fnbPlayer, item: fnbItem.trim(), quantity: parseInt(fnbQty) || 1, total_price: parseInt(fnbPrice) }]);
-    setFnbItem(""); setFnbQty("1"); setFnbPrice("");
+    const qty = parseInt(fnbQty) || 1;
+    const unitPrice = parseInt(fnbUnitPrice);
+    if (!fnbPlayer || !fnbItem.trim() || !unitPrice) return;
+
+    const total_price = qty * unitPrice;
+    await supabase.from("fnb_orders").insert([{
+      player_name: fnbPlayer,
+      item: fnbItem.trim(),
+      quantity: qty,
+      total_price,
+    }]);
+    setFnbItem("");
+    setFnbQty("1");
+    setFnbUnitPrice("");
     await loadData();
   };
   const deleteFnbOrder = async (id) => {
@@ -568,9 +579,9 @@ export default function ClubMatchLog() {
                     <input value={fnbItem} onChange={e => setFnbItem(e.target.value)} placeholder="Item (Pocari, Cơm...)" style={{ ...inputStyle, flex: 2 }} />
                     <input value={fnbQty} onChange={e => setFnbQty(e.target.value)} type="number" min="1" placeholder="Qty" style={{ ...inputStyle, width: 56 }} />
                   </div>
-                  <input value={fnbPrice} onChange={e => setFnbPrice(e.target.value)} type="number" placeholder="Total price in VND (e.g. 15000)" style={{ ...inputStyle, width: "100%", marginBottom: 10 }} />
-                  <button onClick={addFnbOrder} disabled={!fnbPlayer || !fnbItem.trim() || !fnbPrice}
-                    style={{ width: "100%", padding: "11px", border: "none", borderRadius: 10, background: fnbPlayer && fnbItem.trim() && fnbPrice ? "#60A5FA" : "rgba(255,255,255,0.06)", color: fnbPlayer && fnbItem.trim() && fnbPrice ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace" }}>
+                    <input value={fnbUnitPrice} onChange={e => setFnbUnitPrice(e.target.value)} type="number" placeholder="Đơn giá (VND) (vd: 15000)" style={{ ...inputStyle, width: "100%", marginBottom: 10 }} />
+                    <button onClick={addFnbOrder} disabled={!fnbPlayer || !fnbItem.trim() || !fnbUnitPrice}
+                      style={{ width: "100%", padding: "11px", border: "none", borderRadius: 10, background: fnbPlayer && fnbItem.trim() && fnbUnitPrice ? "#60A5FA" : "rgba(255,255,255,0.06)", color: fnbPlayer && fnbItem.trim() && fnbUnitPrice ? "#080b10" : "rgba(255,255,255,0.2)", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "monospace" }}>
                     + Log Order
                   </button>
                 </div>
