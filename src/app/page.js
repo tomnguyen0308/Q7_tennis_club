@@ -524,7 +524,7 @@ export default function ClubMatchLog() {
                         <div style={{ fontSize: 13, fontWeight: 600 }}>{c.name}</div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5 }}>
                           <span style={{ fontSize: 11, fontFamily: "monospace", padding: "2px 7px", borderRadius: 6, background: c.paid ? "rgba(74,222,128,0.1)" : "rgba(251,146,60,0.1)", color: c.paid ? "#4ADE80" : "#FB923C", border: `1px solid ${c.paid ? "rgba(74,222,128,0.2)" : "rgba(251,146,60,0.2)"}` }}>
-                            {c.paid ? "✓ 170k paid" : "⏳ 170k unpaid"}
+                            {c.paid ? `✓ ${formatVND(CASUAL_FEE)} paid` : `⏳ ${formatVND(CASUAL_FEE)} unpaid`}
                           </span>
                           <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontFamily: "monospace", cursor: "pointer", color: "rgba(255,255,255,0.4)" }}>
                             <input type="checkbox" checked={c.paid} onChange={() => toggleCasualPaid(c.id, c.paid)} style={{ accentColor: "#4ADE80", cursor: "pointer" }} />
