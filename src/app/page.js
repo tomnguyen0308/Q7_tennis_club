@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
 const ADMIN_PASSWORD = "keobonG11";
@@ -196,6 +196,8 @@ export default function ClubMatchLog() {
   // Casual
   const [casualInput, setCasualInput] = useState("");
   const [casualBannedWarn, setCasualBannedWarn] = useState(false);
+  const [addingCasual, setAddingCasual] = useState(false);
+  const casualAddInFlightRef = useRef(false);
 
   // F&B
   const [fnbPlayer, setFnbPlayer] = useState("");
@@ -290,14 +292,23 @@ export default function ClubMatchLog() {
 
   // Casual
   const addCasual = async () => {
+    if (casualAddInFlightRef.current) return;
     const name = casualInput.trim();
     if (!name) return;
     if (isBanned(name)) { setShowBanned(true); setCasualInput(""); setCasualBannedWarn(false); return; }
     if (!activeSessionId) { alert("Please select or create a session first."); return; }
-    await supabase.from("casual_players").insert([{ session_id: activeSessionId, name, paid: false }]);
-    setCasualInput("");
-    setCasualBannedWarn(false);
-    await loadData();
+
+    casualAddInFlightRef.current = true;
+    setAddingCasual(true);
+    try {
+      await supabase.from("casual_players").insert([{session_id: activeSessionId, name, paid: false}]);
+      setCasualInput("");
+      setCasualBannedWarn(false);
+      await loadData();
+    } finally {
+      casualAddInFlightRef.current = false;
+      setAddingCasual(false);
+    }
   };
   const removeCasual = async (id) => {
     await supabase.from("casual_players").delete().eq("id", id);
@@ -500,7 +511,7 @@ export default function ClubMatchLog() {
                 </div>
 
                 <div style={cardStyle}>
-                  <div style={labelStyle}>WALK-INS · 170k FEE EACH</div>
+                  <div style={labelStyle}>WALK-INS · {formatVND(CASUAL_FEE)} FEE EACH</div>
                   {activeCasuals.length === 0 && (
                     <div style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontFamily: "monospace", marginBottom: 12 }}>No casual players this session yet</div>
                   )}
@@ -525,12 +536,15 @@ export default function ClubMatchLog() {
                     </div>
                   ))}
 
-                  <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                  <form 
+                    onSubmit={(e) => { e.preventDefault(); addCasual(); }}
+                    style={{ display: "flex", gap: 8, marginTop: 12 }}
+                  >
                     <input value={casualInput} onChange={e => { setCasualInput(e.target.value); setCasualBannedWarn(isBanned(e.target.value)); }}
-                      onKeyDown={e => e.key === "Enter" && addCasual()}
+
                       placeholder="Casual player name..." style={{ ...inputStyle, flex: 1 }} />
-                    <button onClick={addCasual} style={{ background: "#60A5FA", border: "none", borderRadius: 8, color: "#080b10", fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: "pointer", fontFamily: "monospace" }}>+ Add</button>
-                  </div>
+                    <button type="submit" disabled={addingCasual} style={{ background: "#60A5FA", border: "none", borderRadius: 8, color: "#080b10", fontWeight: 700, fontSize: 12, padding: "8px 14px", cursor: addingCasual ? "not-allowed" : "pointer", fontFamily: "monospace", opacity: addingCasual ? 0.6 : 1 }}>+ Add</button>
+                  </form>
                   {casualBannedWarn && (
                     <div style={{ marginTop: 8, background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#F87171", fontFamily: "monospace" }}>
                       🚫 This player is not allowed in the club.
@@ -642,7 +656,7 @@ export default function ClubMatchLog() {
                             </div>
                             <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
-                                170k entry {fine > 0 ? `+ ${formatVND(fine)} fine` : ""}
+                                {formatVND(CASUAL_FEE)} entry {fine > 0 ? `+ ${formatVND(fine)} fine` : ""}
                               </span>
                               <span style={{ fontSize: 15, fontWeight: 700, color: c.paid && fine === 0 ? "#4ADE80" : "#F87171" }}>
                                 {formatVND(total)} total
